@@ -1,16 +1,22 @@
-import express from "express"
-import cookieParser from "cookie-parser"
-import authRouter from "./routes/auth.routes.js"
+import express from "express";
+import cookieParser from "cookie-parser";
+import authRouter from "./routes/auth.routes.js";
 
-const app = express()
+const app = express();
 
-// built-in middleware
-app.use(express.json())
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// third-party middleware
-app.use(cookieParser())
+// Routes
+app.use("/api/auth", authRouter);
 
-// routes
-app.use("/api/auth", authRouter)
+// Health check
+app.get("/", (req, res) => {
+    res.json({ message: "Server is running" });
+});
 
-export default app
+// app.use("/api/auth", authRouter);
+
+export default app;
