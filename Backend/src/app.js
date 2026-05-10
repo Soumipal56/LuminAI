@@ -36,17 +36,18 @@ app.use(cors({
 }));
 
 // Health check route
-app.get(ROUTES.health, (req, res) => {
+app.get("/health", (req, res) => {
     res.json({ message: "Health check successful" });
 });
+
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(`${ROUTES.prefix}/auth`, authRouter);
 app.use(`${ROUTES.prefix}/chats`, chatRouter);
 app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
-app.use(express.static(path.join(__dirname, "../public")));
-
-app.get("/{*path}", (req, res) => {
+// SPA fallback - MUST be last
+app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
