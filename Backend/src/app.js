@@ -51,12 +51,12 @@ console.log("Folder exists:", fs.existsSync(publicPath));
 
 if (fs.existsSync(publicPath)) {
   app.use(express.static(publicPath));
-  app.get("/*splat", (req, res) => {
+  app.get("*", (req, res) => {
     res.sendFile(path.join(publicPath, "index.html"));
   });
 } else {
   console.error("❌ Public folder not found at:", publicPath);
-  app.get("/*splat", (req, res) => {
+  app.get("*", (req, res) => {
     res.status(404).json({ error: "Frontend not built" });
   });
 }
