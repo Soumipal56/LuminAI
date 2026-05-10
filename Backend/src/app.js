@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes.js"
 import chatRouter from "./routes/chat.routes.js"
 import shareRouter from "./routes/share.routes.js"
+import ROUTES from "./config/routes.config.js"
 import cors from "cors"
 import morgan from "morgan"
 import path from "path";
@@ -24,13 +25,13 @@ app.use(cors({
 }))
 
 // Health check route
-app.get("/", (req, res) => {
+app.get(ROUTES.health, (req, res) => {
     res.json({ message: "Health check successful" });
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/chats", chatRouter);
-app.use("/api/shares", shareRouter);
+app.use("/", authRouter);
+app.use("/", chatRouter);
+app.use("/", shareRouter);
 
 app.use(express.static(path.join(__dirname, "../public")));
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { registerValidator, loginValidator } from "../validators/auth.validator.js";
 import { register, verifyEmail, login, getMe } from "../controllers/auth.controller.js";
 import { authUser } from "../middleware/auth.middleware.js";
+import ROUTES from "../config/routes.config.js";
 
 const authRouter = Router();
 
@@ -11,7 +12,7 @@ const authRouter = Router();
  * @access Public
  * @body { username, email, password }
  */
-authRouter.post("/register", registerValidator, register)
+authRouter.post(ROUTES.auth.register, registerValidator, register)
 
 /**
  * @route POST /api/auth/login
@@ -19,14 +20,14 @@ authRouter.post("/register", registerValidator, register)
  * @access Public
  * @body { email, password }
  */
-authRouter.post("/login", loginValidator, login)
+authRouter.post(ROUTES.auth.login, loginValidator, login)
 
 /**
  * @route GET /api/auth/get-me
  * @desc Get current logged in user's details
  * @access Private
  */
-authRouter.get('/get-me', authUser, getMe)
+authRouter.get(ROUTES.auth.getMe, authUser, getMe)
 
 /**
  * @route GET /api/auth/verify-email
@@ -34,7 +35,7 @@ authRouter.get('/get-me', authUser, getMe)
  * @access Public
  * @query { token }
  */
-authRouter.get("/verify-email", verifyEmail)
+authRouter.get(ROUTES.auth.verifyEmail, verifyEmail)
 
 
 export default authRouter;
