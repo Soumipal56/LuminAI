@@ -1,9 +1,5 @@
-import axios from "axios"
-
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "",
-    withCredentials: true
-})
+import api from "../../../utils/axios.js"
+import { API } from "../../../config/api.config.js"
 
 export const sendMessage = async ({message, chatId}) => {
     const response = await api.post("/api/chats/message", {message, chat: chatId})
@@ -12,7 +8,7 @@ export const sendMessage = async ({message, chatId}) => {
 
 export const sendMessageStream = async ({message, chatId, onInit, onContent, onTool, onDone, onError}) => {
     try {
-        const response = await fetch((import.meta.env.VITE_API_URL || "") + "/api/chats/message", {
+        const response = await fetch(API.chats.message, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

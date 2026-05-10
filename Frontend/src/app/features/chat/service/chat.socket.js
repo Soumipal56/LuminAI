@@ -1,7 +1,8 @@
 import { io } from "socket.io-client";
+import { API } from "../../../config/api.config.js";
 
 export const initializeSocketConnection = () => {
-    const socket = io(import.meta.env.VITE_API_URL || "", {
+    const socket = io(API.baseUrl, {
         withCredentials: true
     });
     
@@ -9,4 +10,3 @@ export const initializeSocketConnection = () => {
         console.log("Connected to Socket.IO server");
     })
 }
-

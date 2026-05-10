@@ -1,9 +1,4 @@
-import axios from "axios"
-
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "",
-    withCredentials: true,
-})
+import api from "../../../utils/axios.js"
 
 export async function register({ email, username, password }){
     const response = await api.post("/api/auth/register", { email, username, password })
