@@ -5,6 +5,11 @@ import chatRouter from "./routes/chat.routes.js"
 import shareRouter from "./routes/share.routes.js"
 import cors from "cors"
 import morgan from "morgan"
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -26,5 +31,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/chats", chatRouter);
 app.use("/api/shares", shareRouter);
+
+app.use(express.static(path.join(__dirname, "../public")));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
 
 export default app;
