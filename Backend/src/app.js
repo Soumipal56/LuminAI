@@ -19,20 +19,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowed = [
-      process.env.FRONTEND_URL,
-      "http://localhost:5173",
-      "http://localhost:5174"
-    ].filter(Boolean); // removes undefined
-    if (!origin || allowed.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+        const allowed = [
+            process.env.FRONTEND_URL,
+            "http://localhost:5173",
+            "http://localhost:5174"
+        ].filter(Boolean); // removes undefined
+        if (!origin || allowed.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
 }));
 
 // Health check route
