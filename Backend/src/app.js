@@ -51,12 +51,12 @@ const publicPath = path.join(__dirname, "../public");
 if (fs.existsSync(publicPath)) {
     app.use(express.static(publicPath));
     // SPA fallback - MUST be last
-    app.get("*", (req, res) => {
+    app.get("/*splat", (req, res) => {
         res.sendFile(path.join(publicPath, "index.html"));
     });
 } else {
     console.error("❌ Static folder not found at:", publicPath);
-    app.get("*", (req, res) => {
+    app.get("/*splat", (req, res) => {
         res.status(404).json({
             error: "Frontend not built. Run npm run build first.",
             path: publicPath
