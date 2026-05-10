@@ -10,10 +10,11 @@ const Dashboard = () => {
     const { user } = useSelector(state => state.auth);
     const [message, setMessage] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    
+
     const chats = useSelector((state) => state.chat.chats)
     const currentChatId = useSelector((state) => state.chat.currentChatId)
-    
+    const isLoading = useSelector((state) => state.chat.isLoading)
+
     const currentMessages = chats[currentChatId]?.messages || [];
     const [isSharing, setIsSharing] = useState(false);
 
@@ -101,8 +102,8 @@ const Dashboard = () => {
                         <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Recently</h2>
                         <div className="space-y-1.5">
                             {Object.values(chats).map((chat, index) => (
-                                <div 
-                                    key={chat._id} 
+                                <div
+                                    key={chat._id}
                                     onClick={() => dispatch(setCurrentChatId(chat._id))}
                                     className={`text-[13px] p-2.5 rounded-lg cursor-pointer truncate transition-colors ${currentChatId === chat._id ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}`}
                                 >
@@ -212,6 +213,11 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             ))}
+                            {isLoading && (
+                                <div className="ai-msg">
+                                    <div className="spinner" /> Thinking...
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
