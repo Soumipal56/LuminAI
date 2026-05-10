@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes.js"
 import chatRouter from "./routes/chat.routes.js"
@@ -40,15 +41,27 @@ app.get("/health", (req, res) => {
     res.json({ message: "Health check successful" });
 });
 
-app.use(express.static(path.join(__dirname, "../public")));
-
 app.use(`${ROUTES.prefix}/auth`, authRouter);
 app.use(`${ROUTES.prefix}/chats`, chatRouter);
 app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
-// SPA fallback - MUST be last
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../public", "index.html"));
-});
+// Static file serving with existence check
+const publicPath = path.join(__dirname, "../public");
+
+if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+    // SPA fallback - MUST be last
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(publicPath, "index.html"));
+    });
+} else {
+    console.error("❌ Static folder not found at:", publicPath);
+    app.get("*", (req, res) => {
+        res.status(404).json({
+            error: "Frontend not built. Run npm run build first.",
+            path: publicPath
+        });
+    });
+}
 
 export default app;
