@@ -34,7 +34,7 @@ export const useChat = () => {
         }
     }
     
-    async function fetchChats(){
+    async function handleGetChats(){
         dispatch(setLoading(true))
         try {
             const chats = await getChats()
@@ -53,6 +53,6 @@ export const useChat = () => {
     return {
         initializeSocketConnection,
         handleSendMessage,
-        fetchChats,
+        handleGetChats,
     }
 }

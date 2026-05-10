@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
 import { setCurrentChatId } from '../chat.slice';
+import ReactMarkdown from 'react-markdown';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         chat.initializeSocketConnection();
-        chat.fetchChats();
+        chat.handleGetChats();
     }, []);
 
     const handleSendMessage = (e) => {
@@ -76,7 +77,7 @@ const Dashboard = () => {
                     <div className="mt-10 px-3">
                         <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Recently</h2>
                         <div className="space-y-1.5">
-                            {Object.values(chats).map((chat) => (
+                            {Object.values(chats).map((chat, index) => (
                                 <div 
                                     key={chat._id} 
                                     onClick={() => dispatch(setCurrentChatId(chat._id))}
@@ -151,9 +152,15 @@ const Dashboard = () => {
                                     </div>
                                     <div className={`flex-1 space-y-4 ${msg.role === 'user' ? 'text-right' : ''}`}>
                                         <div className={`inline-block max-w-[90%] text-left ${msg.role === 'user' ? 'bg-white/5 p-4 rounded-2xl border border-white/10 shadow-lg' : ''}`}>
-                                            <p className={`text-lg leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-gray-300' : 'text-white font-medium'}`}>
-                                                {msg.content}
-                                            </p>
+                                            {msg.role === 'ai' ? (
+                                                <div className="markdown-content text-lg leading-relaxed text-gray-300 prose prose-invert max-w-none">
+                                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                <p className="text-lg leading-relaxed whitespace-pre-wrap text-white font-medium">
+                                                    {msg.content}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
