@@ -45,40 +45,20 @@ app.use(`${ROUTES.prefix}/auth`, authRouter);
 app.use(`${ROUTES.prefix}/chats`, chatRouter);
 app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
-// --- Robust Static File Serving ---
-// Determine all possible locations for the frontend build
-const possiblePaths = [
-    path.join(__dirname, "../../Frontend/dist"), // Direct access to frontend build
-    path.join(__dirname, "../public"),           // Copied to public
-    path.join(__dirname, "../public/dist")       // Nested copy in public/dist
-];
+const publicPath = path.join(__dirname, "../public");
+console.log("Looking for static files at:", publicPath);
+console.log("Folder exists:", fs.existsSync(publicPath));
 
-let activePublicPath = null;
-
-// Find the first path that actually contains an index.html
-for (const p of possiblePaths) {
-    if (fs.existsSync(path.join(p, "index.html"))) {
-        activePublicPath = p;
-        break;
-    }
-}
-
-if (activePublicPath) {
-    console.log("✅ Serving static files from:", activePublicPath);
-    app.use(express.static(activePublicPath));
-    
-    // SPA fallback - MUST be last
-    app.get("/*splat", (req, res) => {
-        res.sendFile(path.join(activePublicPath, "index.html"));
-    });
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  app.get("/*splat", (req, res) => {
+    res.sendFile(path.join(publicPath, "index.html"));
+  });
 } else {
-    console.error("❌ No frontend build found. Checked paths:", possiblePaths);
-    app.get("/*splat", (req, res) => {
-        res.status(404).json({
-            error: "Frontend not built. Run npm run build first.",
-            checkedPaths: possiblePaths
-        });
-    });
+  console.error("❌ Public folder not found at:", publicPath);
+  app.get("/*splat", (req, res) => {
+    res.status(404).json({ error: "Frontend not built" });
+  });
 }
 
 export default app;
