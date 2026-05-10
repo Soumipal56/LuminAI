@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { API } from "../../../config/api.config.js";
+import { API } from "../../../../config/api.config.js";
 
 export const initializeSocketConnection = () => {
     const socket = io(API.baseUrl, {

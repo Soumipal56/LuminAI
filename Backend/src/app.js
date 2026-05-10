@@ -29,9 +29,9 @@ app.get(ROUTES.health, (req, res) => {
     res.json({ message: "Health check successful" });
 });
 
-app.use("/", authRouter);
-app.use("/", chatRouter);
-app.use("/", shareRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/chats", chatRouter);
+app.use("/api/shares", shareRouter);
 
 app.use(express.static(path.join(__dirname, "../public")));
 

@@ -1,5 +1,5 @@
-import api from "../../../utils/axios.js"
-import { API } from "../../../config/api.config.js"
+import api from "../../../../utils/axios.js"
+import { API } from "../../../../config/api.config.js"
 
 export const sendMessage = async ({message, chatId}) => {
     const response = await api.post("/api/chats/message", {message, chat: chatId})

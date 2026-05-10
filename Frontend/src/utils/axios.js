@@ -1,8 +1,10 @@
 import axios from "axios";
-import { API } from "../config/api.config";
+
+// Hardcoding for absolute certainty in production debugging
+const API_BASE_URL = "https://luminai-qdrn.onrender.com";
 
 const axiosInstance = axios.create({
-  baseURL: API.baseUrl,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
