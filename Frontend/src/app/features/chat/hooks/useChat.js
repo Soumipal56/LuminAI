@@ -1,5 +1,5 @@
 import { initializeSocketConnection } from "../service/chat.socket";
-import { sendMessage as sendMessageAPI, getChats, getMessages, deleteChat } from "../service/chat.api";
+import { sendMessage as sendMessageAPI, getChats, getMessages, deleteChat, shareChat } from "../service/chat.api";
 import { setChats, setCurrentChatId, setError, setLoading, createNewChat, addNewMessage } from "../chat.slice"
 import { useDispatch } from "react-redux";
 
@@ -49,10 +49,23 @@ export const useChat = () => {
             dispatch(setLoading(false))
         }
     }
+
+    async function handleShareChat(chatId) {
+        dispatch(setLoading(true))
+        try {
+            const data = await shareChat({ chatId })
+            return data; // Returns shareId and shareUrl
+        } catch (err) {
+            dispatch(setError(err.message))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
     
     return {
         initializeSocketConnection,
         handleSendMessage,
         handleGetChats,
+        handleShareChat,
     }
 }
