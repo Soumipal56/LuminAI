@@ -7,28 +7,42 @@ export async function sendMessage(req, res) {
     const { message, chat: chatId } = req.body;
 
 
-    let title = null, chat = null;
+    let effectiveChatId = chatId;
+    let title = null;
+    let chat = null;
 
-    if (!chatId) {
+    if (chatId) {
+        const messageCount = await messageModel.countDocuments({ chat: chatId });
+        if (messageCount >= 10) {
+            effectiveChatId = null;
+        }
+    }
+
+    if (!effectiveChatId) {
         title = await generateChatTitle(message);
         chat = await chatModel.create({
             user: req.user.id,
             title
         })
+    } else {
+        chat = await chatModel.findOne({ _id: effectiveChatId, user: req.user.id });
+        if (!chat) {
+            return res.status(404).json({ message: "Chat not found" });
+        }
     }
 
     const userMessage = await messageModel.create({
-        chat: chatId || chat._id,
+        chat: effectiveChatId || chat._id,
         content: message,
         role: "user"
     })
 
-    const messages = await messageModel.find({ chat: chatId || chat._id })
+    const messages = await messageModel.find({ chat: effectiveChatId || chat._id })
 
     const result = await generateResponse(messages);
 
     const aiMessage = await messageModel.create({
-        chat: chatId || chat._id,
+        chat: effectiveChatId || chat._id,
         content: result,
         role: "ai"
     })

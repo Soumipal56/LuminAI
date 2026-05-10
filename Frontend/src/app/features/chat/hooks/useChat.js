@@ -1,6 +1,6 @@
 import { initializeSocketConnection } from "../service/chat.socket";
 import { sendMessage as sendMessageAPI, getChats, getMessages, deleteChat, shareChat } from "../service/chat.api";
-import { setChats, setCurrentChatId, setError, setLoading, createNewChat, addNewMessage } from "../chat.slice"
+import { setChats, setCurrentChatId, setError, setLoading, createNewChat, addNewMessage, setMessages } from "../chat.slice"
 import { useDispatch } from "react-redux";
 
 export const useChat = () => {
@@ -37,12 +37,31 @@ export const useChat = () => {
     async function handleGetChats(){
         dispatch(setLoading(true))
         try {
-            const chats = await getChats()
-            // Convert array to object if necessary, or just dispatch if backend returns object
-            const chatsObj = Array.isArray(chats) 
-                ? chats.reduce((acc, chat) => ({ ...acc, [chat._id]: chat }), {})
-                : chats;
+            const data = await getChats()
+            const chatsArray = data.chats || []
+            
+            // Convert array to object mapping _id -> chat
+            const chatsObj = chatsArray.reduce((acc, chat) => ({ 
+                ...acc, 
+                [chat._id]: { ...chat, messages: [] } 
+            }), {});
+            
             dispatch(setChats(chatsObj))
+        } catch (err) {
+            dispatch(setError(err.message))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    async function handleGetMessages(chatId) {
+        if (!chatId) return;
+        dispatch(setLoading(true))
+        try {
+            const data = await getMessages({ chatId })
+            const messages = data.messages || []
+            
+            dispatch(setMessages({ chatId, messages }))
         } catch (err) {
             dispatch(setError(err.message))
         } finally {
@@ -66,6 +85,7 @@ export const useChat = () => {
         initializeSocketConnection,
         handleSendMessage,
         handleGetChats,
+        handleGetMessages,
         handleShareChat,
     }
 }

@@ -39,6 +39,12 @@ const Dashboard = () => {
         chat.handleGetChats();
     }, []);
 
+    useEffect(() => {
+        if (currentChatId && (!chats[currentChatId]?.messages || chats[currentChatId].messages.length === 0)) {
+            chat.handleGetMessages(currentChatId);
+        }
+    }, [currentChatId]);
+
     const handleSendMessage = (e) => {
         e.preventDefault();
         const trimmedMessage = message.trim();
