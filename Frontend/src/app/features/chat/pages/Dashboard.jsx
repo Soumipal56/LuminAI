@@ -1,36 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
+import { setCurrentChatId } from '../chat.slice';
 
 const Dashboard = () => {
+    const dispatch = useDispatch();
     const chat = useChat();
     const { user } = useSelector(state => state.auth);
     const [message, setMessage] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [messages, setMessages] = useState([
-        { role: 'user', content: 'What are the key benefits of using LuminAI?' },
-        { role: 'ai', content: 'LuminAI offers several key benefits: \n\n1. **Real-time Intelligence**: Access to the latest information across the web.\n2. **Contextual Reasoning**: High-fidelity understanding of complex queries.\n3. **Premium Aesthetics**: A distraction-free, beautiful interface designed for focus.\n4. **Autonomous Capability**: Ability to synthesize deep research into actionable insights.' }
-    ]);
+    
+    const chats = useSelector((state) => state.chat.chats)
+    const currentChatId = useSelector((state) => state.chat.currentChatId)
+    
+    const currentMessages = chats[currentChatId]?.messages || [];
+
 
     useEffect(() => {
         chat.initializeSocketConnection();
+        chat.fetchChats();
     }, []);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!message.trim()) return;
+        const trimmedMessage = message.trim();
+        if (!trimmedMessage) return;
 
-        const newUserMessage = { role: 'user', content: message };
-        setMessages([...messages, newUserMessage]);
-
-        console.log('Sending message:', message);
-        // Implementation for sending message will go here via chat hook
+        chat.handleSendMessage({ message: trimmedMessage, chatId: currentChatId });
         setMessage('');
-
-        // Mocking AI response for dummy effect
-        setTimeout(() => {
-            setMessages(prev => [...prev, { role: 'ai', content: 'I am processing your request using the LuminAI engine...' }]);
-        }, 1000);
     };
 
     return (
@@ -39,7 +36,7 @@ const Dashboard = () => {
             <aside className={`${isSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-[#191C1C] border-r border-white/5 flex flex-col h-full overflow-hidden relative`}>
                 <div className="p-4 flex items-center justify-between">
                     <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-violet-500 bg-clip-text text-transparent">LuminAI</h1>
-                    <button 
+                    <button
                         onClick={() => setIsSidebarOpen(false)}
                         className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-all group"
                         title="Collapse Sidebar"
@@ -52,7 +49,7 @@ const Dashboard = () => {
 
                 <div className="px-4 py-2">
                     <button
-                        onClick={() => setMessages([])}
+                        onClick={() => dispatch(setCurrentChatId(null))}
                         className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center justify-between group transition-all duration-200"
                     >
                         <span className="text-sm font-semibold">New Thread</span>
@@ -79,9 +76,13 @@ const Dashboard = () => {
                     <div className="mt-10 px-3">
                         <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Recently</h2>
                         <div className="space-y-1.5">
-                            {['Modern AI Architecture', 'Frontend Performance', 'Design Patterns 2024'].map((item) => (
-                                <div key={item} className="text-[13px] text-gray-500 p-2.5 hover:bg-white/5 hover:text-gray-300 rounded-lg cursor-pointer truncate transition-colors">
-                                    {item}
+                            {Object.values(chats).map((chat) => (
+                                <div 
+                                    key={chat._id} 
+                                    onClick={() => dispatch(setCurrentChatId(chat._id))}
+                                    className={`text-[13px] p-2.5 rounded-lg cursor-pointer truncate transition-colors ${currentChatId === chat._id ? 'bg-white/10 text-white' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}`}
+                                >
+                                    {chat.title}
                                 </div>
                             ))}
                         </div>
@@ -108,7 +109,7 @@ const Dashboard = () => {
             <section className="flex-1 flex flex-col items-center relative bg-radial-gradient h-screen overflow-hidden">
                 {/* Floating Toggle Button (Visible when sidebar is closed) */}
                 {!isSidebarOpen && (
-                    <button 
+                    <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="absolute top-4 left-4 z-50 p-2.5 bg-[#191C1C]/80 backdrop-blur-xl border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all shadow-2xl animate-fade-in group"
                         title="Expand Sidebar"
@@ -123,7 +124,7 @@ const Dashboard = () => {
 
                 {/* Messages Area */}
                 <div className="w-full max-w-3xl flex-1 overflow-y-auto px-6 py-20 custom-scrollbar scroll-smooth">
-                    {messages.length === 0 ? (
+                    {currentMessages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center gap-12 animate-fade-in">
                             <h2 className="text-5xl font-bold tracking-tight text-white leading-tight text-center">
                                 What do you want to <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-violet-500">know?</span>
@@ -143,7 +144,7 @@ const Dashboard = () => {
                         </div>
                     ) : (
                         <div className="space-y-12">
-                            {messages.map((msg, idx) => (
+                            {currentMessages.map((msg, idx) => (
                                 <div key={idx} className={`flex gap-6 animate-fade-in ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-white/10 ${msg.role === 'ai' ? 'bg-gradient-to-tr from-teal-500 to-violet-600' : 'bg-white/5'}`}>
                                         <span className="text-xs font-bold text-white">{msg.role === 'ai' ? 'L' : user?.username?.charAt(0).toUpperCase()}</span>
@@ -218,7 +219,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Aesthetic Footer Element (Hidden when many messages) */}
-                {messages.length < 3 && (
+                {currentMessages.length < 3 && (
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-5xl px-8 flex justify-between items-center opacity-10 pointer-events-none">
                         <div className="h-px flex-1 bg-gradient-to-r from-transparent to-teal-500"></div>
                         <div className="px-6 text-[9px] font-black uppercase tracking-[0.3em] text-teal-400">LuminAI Enterprise</div>

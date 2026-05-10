@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-export const initialState = {
+export const chatSlice = createSlice({
     name: "chat",
     initialState: {
         chats: {},
@@ -8,25 +7,40 @@ export const initialState = {
         isLoading: false,
         error: null,
     },
-
-    // reducers
     reducers: {
+        createNewChat: (state, action) => {
+            const { chatId, title } = action.payload
+            if (!state.chats[chatId]) {
+                state.chats[chatId] = {
+                    _id: chatId,
+                    title,
+                    messages: [],
+                    lastUpdated: new Date().toISOString(),
+                }
+            }
+        },
+        addNewMessage: (state, action) => {
+            const { chatId, content, role } = action.payload
+            if (state.chats[chatId]) {
+                state.chats[chatId].messages.push({ content, role })
+            }
+        },
         setChats: (state, action) => {
             state.chats = action.payload;
         },
         setCurrentChatId: (state, action) => {
             state.currentChatId = action.payload;
         },
-        setIsLoading: (state, action) => {
+        setLoading: (state, action) => {
             state.isLoading = action.payload;
         },
         setError: (state, action) => {
             state.error = action.payload;
         },
     }
-}
+});
 
-export const { setChats, setCurrentChatId, setIsLoading, setError } = chatSlice.actions;
+export const { setChats, setCurrentChatId, setLoading, setError, createNewChat, addNewMessage } = chatSlice.actions;
 export default chatSlice.reducer;
 
 // chats = {
