@@ -36,7 +36,7 @@ export async function register(req, res) {
         html: `
                 <p>Hi ${username}, </p>
                 <p>Thank you for registering, we are happy to have you on board.</p>
-                <a href="${process.env.BASE_URL}${ROUTES.auth.verifyEmail}?token=${emailVerificationToken}">Verify Email</a>
+                <a href="${process.env.BASE_URL}${ROUTES.prefix}/auth${ROUTES.auth.verifyEmail}?token=${emailVerificationToken}">Verify Email</a>
                 <p>If you did not create this account, please ignore this email.</p>
                 <p>Best regards,</p>
                 <p>LuminAI Team</p>

@@ -19,19 +19,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(cors({
-    origin: [process.env.FRONTEND_URL, "http://localhost:5173", "http://localhost:5174"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-}))
+  origin: function (origin, callback) {
+    const allowed = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ].filter(Boolean); // removes undefined
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
 // Health check route
 app.get(ROUTES.health, (req, res) => {
     res.json({ message: "Health check successful" });
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/chats", chatRouter);
-app.use("/api/shares", shareRouter);
+app.use(`${ROUTES.prefix}/auth`, authRouter);
+app.use(`${ROUTES.prefix}/chats`, chatRouter);
+app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
 app.use(express.static(path.join(__dirname, "../public")));
 
