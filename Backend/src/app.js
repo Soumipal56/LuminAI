@@ -47,21 +47,36 @@ app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
 // Static file serving with existence check
 const publicPath = path.join(__dirname, "../public");
+const distPath = path.join(publicPath, "dist");
 
+// Serve static files from both public and public/dist if they exist
 if (fs.existsSync(publicPath)) {
     app.use(express.static(publicPath));
-    // SPA fallback - MUST be last
-    app.get("/*splat", (req, res) => {
-        res.sendFile(path.join(publicPath, "index.html"));
-    });
-} else {
-    console.error("❌ Static folder not found at:", publicPath);
-    app.get("/*splat", (req, res) => {
+}
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+}
+
+// SPA fallback - MUST be last
+app.get("/*splat", (req, res) => {
+    const indexPath = fs.existsSync(path.join(distPath, "index.html")) 
+        ? path.join(distPath, "index.html") 
+        : path.join(publicPath, "index.html");
+
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath, (err) => {
+            if (err) {
+                console.error("Error sending index.html:", err);
+                res.status(500).send("Internal Server Error");
+            }
+        });
+    } else {
+        console.error("❌ index.html not found at:", indexPath);
         res.status(404).json({
             error: "Frontend not built. Run npm run build first.",
-            path: publicPath
+            checkedPaths: [path.join(publicPath, "index.html"), path.join(distPath, "index.html")]
         });
-    });
-}
+    }
+});
 
 export default app;
