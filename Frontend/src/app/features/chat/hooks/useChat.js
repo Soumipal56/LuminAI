@@ -72,6 +72,12 @@ export const useChat = () => {
             }), {});
             
             dispatch(setChats(chatsObj))
+
+            // Auto-select the most recent chat on initial load
+            if (chatsArray.length > 0) {
+                const sortedChats = [...chatsArray].sort((a, b) => b._id.localeCompare(a._id));
+                dispatch(setCurrentChatId(sortedChats[0]._id));
+            }
         } catch (err) {
             dispatch(setError(err.message))
         } finally {
