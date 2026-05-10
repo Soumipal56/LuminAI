@@ -1,0 +1,233 @@
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useChat } from '../hooks/useChat';
+
+const Dashboard = () => {
+    const chat = useChat();
+    const { user } = useSelector(state => state.auth);
+    const [message, setMessage] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [messages, setMessages] = useState([
+        { role: 'user', content: 'What are the key benefits of using LuminAI?' },
+        { role: 'ai', content: 'LuminAI offers several key benefits: \n\n1. **Real-time Intelligence**: Access to the latest information across the web.\n2. **Contextual Reasoning**: High-fidelity understanding of complex queries.\n3. **Premium Aesthetics**: A distraction-free, beautiful interface designed for focus.\n4. **Autonomous Capability**: Ability to synthesize deep research into actionable insights.' }
+    ]);
+
+    useEffect(() => {
+        chat.initializeSocketConnection();
+    }, []);
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (!message.trim()) return;
+
+        const newUserMessage = { role: 'user', content: message };
+        setMessages([...messages, newUserMessage]);
+
+        console.log('Sending message:', message);
+        // Implementation for sending message will go here via chat hook
+        setMessage('');
+
+        // Mocking AI response for dummy effect
+        setTimeout(() => {
+            setMessages(prev => [...prev, { role: 'ai', content: 'I am processing your request using the LuminAI engine...' }]);
+        }, 1000);
+    };
+
+    return (
+        <main className="h-screen w-full flex bg-[#0F1111] text-gray-200 overflow-hidden font-sans">
+            {/* Sidebar */}
+            <aside className={`${isSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-[#191C1C] border-r border-white/5 flex flex-col h-full overflow-hidden relative`}>
+                <div className="p-4 flex items-center justify-between">
+                    <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-violet-500 bg-clip-text text-transparent">LuminAI</h1>
+                    <button 
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-all group"
+                        title="Collapse Sidebar"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div className="px-4 py-2">
+                    <button
+                        onClick={() => setMessages([])}
+                        className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center justify-between group transition-all duration-200"
+                    >
+                        <span className="text-sm font-semibold">New Thread</span>
+                        <div className="w-5 h-5 flex items-center justify-center rounded-md border border-white/20 group-hover:border-white/40 text-xs font-bold text-gray-500 transition-colors">+</div>
+                    </button>
+                </div>
+
+                <nav className="flex-1 mt-6 px-2 space-y-1 overflow-y-auto custom-scrollbar">
+                    {[
+                        { icon: '🏠', label: 'Home', active: true },
+                        { icon: '🌐', label: 'Discover' },
+                        { icon: '📚', label: 'Library' },
+                    ].map((item) => (
+                        <a
+                            key={item.label}
+                            href="#"
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${item.active ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                        >
+                            <span className="text-lg opacity-80 group-hover:scale-110 transition-transform">{item.icon}</span>
+                            <span className="text-sm font-medium">{item.label}</span>
+                        </a>
+                    ))}
+
+                    <div className="mt-10 px-3">
+                        <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Recently</h2>
+                        <div className="space-y-1.5">
+                            {['Modern AI Architecture', 'Frontend Performance', 'Design Patterns 2024'].map((item) => (
+                                <div key={item} className="text-[13px] text-gray-500 p-2.5 hover:bg-white/5 hover:text-gray-300 rounded-lg cursor-pointer truncate transition-colors">
+                                    {item}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+
+                <div className="p-4 border-t border-white/5 bg-[#191C1C]">
+                    <div className="flex items-center gap-3 p-2.5 hover:bg-white/5 rounded-xl cursor-pointer transition-all border border-transparent hover:border-white/5 group">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-500 to-violet-600 flex items-center justify-center text-sm font-bold text-white shadow-lg group-hover:scale-105 transition-transform">
+                            {user?.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <p className="text-sm font-semibold truncate group-hover:text-white transition-colors">{user?.username || 'User'}</p>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Free Member</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <section className="flex-1 flex flex-col items-center relative bg-radial-gradient h-screen overflow-hidden">
+                {/* Floating Toggle Button (Visible when sidebar is closed) */}
+                {!isSidebarOpen && (
+                    <button 
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="absolute top-4 left-4 z-50 p-2.5 bg-[#191C1C]/80 backdrop-blur-xl border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all shadow-2xl animate-fade-in group"
+                        title="Expand Sidebar"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-180 transition-transform duration-300">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                )}
+
+                {/* Messages Area */}
+                <div className="w-full max-w-3xl flex-1 overflow-y-auto px-6 py-20 custom-scrollbar scroll-smooth">
+                    {messages.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center gap-12 animate-fade-in">
+                            <h2 className="text-5xl font-bold tracking-tight text-white leading-tight text-center">
+                                What do you want to <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-violet-500">know?</span>
+                            </h2>
+                            <div className="flex flex-wrap justify-center gap-3">
+                                {['Build a neural network', 'Impact of Quantum Computing', 'Modern CSS Architecture', 'Philosophy of AI'].map(suggestion => (
+                                    <button
+                                        key={suggestion}
+                                        type="button"
+                                        onClick={() => setMessage(suggestion)}
+                                        className="px-5 py-2 bg-[#1E2121] hover:bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl text-[13px] font-semibold text-gray-400 hover:text-teal-400 transition-all shadow-lg hover:shadow-teal-500/10"
+                                    >
+                                        {suggestion}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-12">
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={`flex gap-6 animate-fade-in ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-white/10 ${msg.role === 'ai' ? 'bg-gradient-to-tr from-teal-500 to-violet-600' : 'bg-white/5'}`}>
+                                        <span className="text-xs font-bold text-white">{msg.role === 'ai' ? 'L' : user?.username?.charAt(0).toUpperCase()}</span>
+                                    </div>
+                                    <div className={`flex-1 space-y-4 ${msg.role === 'user' ? 'text-right' : ''}`}>
+                                        <div className={`inline-block max-w-[90%] text-left ${msg.role === 'user' ? 'bg-white/5 p-4 rounded-2xl border border-white/10 shadow-lg' : ''}`}>
+                                            <p className={`text-lg leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-gray-300' : 'text-white font-medium'}`}>
+                                                {msg.content}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Input Area */}
+                <div className="w-full max-w-3xl px-6 pb-10 pt-4 bg-gradient-to-t from-[#0F1111] via-[#0F1111] to-transparent">
+                    <form
+                        onSubmit={handleSendMessage}
+                        className="w-full relative"
+                    >
+                        <div className="w-full bg-[#1E2121]/80 backdrop-blur-xl rounded-3xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] focus-within:border-white/20 transition-all duration-300 flex flex-col gap-2">
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder="Ask LuminAI anything..."
+                                className="w-full bg-transparent border-none focus:ring-0 text-lg resize-none min-h-[60px] max-h-[200px] placeholder:text-gray-600 scrollbar-hide font-medium"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendMessage(e);
+                                    }
+                                }}
+                            />
+
+                            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                                <div className="flex items-center gap-1">
+                                    <button type="button" className="p-2 hover:bg-white/5 rounded-xl transition-all text-gray-400 hover:text-white">
+                                        <span className="text-lg">📎</span>
+                                    </button>
+                                    <button type="button" className="p-2 hover:bg-white/5 rounded-xl transition-all text-gray-400 hover:text-white">
+                                        <span className="text-lg">🔍</span>
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <label className="hidden sm:flex items-center gap-2 cursor-pointer p-2 hover:bg-white/5 rounded-xl group/pro">
+                                        <div className="w-4 h-4 rounded-full border-2 border-gray-600 flex items-center justify-center group-hover/pro:border-teal-500">
+                                            <div className="w-2 h-2 rounded-full bg-teal-500 opacity-0 group-hover/pro:opacity-100"></div>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-gray-500 group-hover/pro:text-white uppercase tracking-widest">Pro</span>
+                                    </label>
+
+                                    <button
+                                        type="submit"
+                                        disabled={!message.trim()}
+                                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${message.trim()
+                                            ? 'bg-teal-500 text-white shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:scale-105'
+                                            : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M12 19V5M5 12l7-7 7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Aesthetic Footer Element (Hidden when many messages) */}
+                {messages.length < 3 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-5xl px-8 flex justify-between items-center opacity-10 pointer-events-none">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-teal-500"></div>
+                        <div className="px-6 text-[9px] font-black uppercase tracking-[0.3em] text-teal-400">LuminAI Enterprise</div>
+                        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-violet-500"></div>
+                    </div>
+                )}
+            </section>
+        </main>
+    );
+};
+
+export default Dashboard;
