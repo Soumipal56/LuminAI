@@ -1,4 +1,4 @@
-import { generateResponse, generateChatTitle } from "../services/ai.service.js";
+import { generateResponseStream, generateChatTitle } from "../services/ai.service.js";
 import chatModel from "../models/chat.model.js";
 import messageModel from "../models/message.model.js";
 
@@ -39,20 +39,44 @@ export async function sendMessage(req, res) {
 
     const messages = await messageModel.find({ chat: effectiveChatId || chat._id })
 
-    const result = await generateResponse(messages);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
-    const aiMessage = await messageModel.create({
-        chat: effectiveChatId || chat._id,
-        content: result,
-        role: "ai"
-    })
+    // Send initial chat info
+    res.write(`data: ${JSON.stringify({ type: 'init', chat, title })}\n\n`);
 
-    res.status(201).json({
-        title,
-        chat,
-        aiMessage
-    })
+    try {
+        const stream = await generateResponseStream(messages);
+        let finalResponse = "";
 
+        for await (const event of stream) {
+            if (event.event === "on_chat_model_stream") {
+                const chunk = event.data.chunk;
+                // Accumulate tokens as they stream in
+                if (chunk && typeof chunk.content === 'string') {
+                    finalResponse += chunk.content;
+                    res.write(`data: ${JSON.stringify({ type: 'content', content: finalResponse })}\n\n`);
+                }
+            } else if (event.event === "on_tool_start") {
+                res.write(`data: ${JSON.stringify({ type: 'tool', tools: [event.name] })}\n\n`);
+            }
+        }
+
+        const aiMessage = await messageModel.create({
+            chat: effectiveChatId || chat._id,
+            content: finalResponse,
+            role: "ai"
+        });
+
+        res.write(`data: ${JSON.stringify({ type: 'done', aiMessage })}\n\n`);
+        res.end();
+
+    } catch (err) {
+        console.error("Streaming error:", err);
+        res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+        res.end();
+    }
 }
 
 export async function getChats(req, res){

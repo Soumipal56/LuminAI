@@ -1,9 +1,11 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatMistralAI } from "@langchain/mistralai";
-import { HumanMessage, SystemMessage, AIMessage } from "langchain";
+import { HumanMessage, SystemMessage, AIMessage, tool, createAgent } from "langchain";
+import * as z from "zod"
+import { searchInternet } from "./internet.service.js"
 
 const geminiModel = new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-flash-latest",
     apiKey: process.env.GEMINI_API_KEY
 });
 
@@ -12,17 +14,37 @@ const mistralModel = new ChatMistralAI({
     apiKey: process.env.MISTRAL_API_KEY
 });
 
-export async function generateResponse(messages) {
+const searchInternetTool = tool(
+    searchInternet,
+    {
+        name: "searchInternet",
+        description: "Use this tool when you need to search the internet for latest information. This tool is not to be used to answer questions which can be answered without searching the internet. If the user asks for weather report, use this tool. If the user asks about a topic, use this tool. If the user asks something that requires searching the internet, use this tool. If the user asks something that can be answered without searching the internet, do not use this tool.",
+        inputSchema: z.object({
+            query: z.string().describe("The query to search the internet for."),
+        }),
+    }
+)
 
-    const response = await geminiModel.invoke(messages.map(msg=>{
-        if(msg.role == "user"){
-            return new HumanMessage(msg.content)
-        }else if(msg.role == "ai"){
-            return new AIMessage(msg.content)
-        }
-    }));
+const agent = createAgent({
+    model: geminiModel,
+    tools: [searchInternetTool],
+})
 
-    return response.text;
+export async function generateResponseStream(messages) {
+    const stream = await agent.streamEvents(
+        {
+            messages: messages.map(msg => {
+                if (msg.role == "user") {
+                    return new HumanMessage(msg.content)
+                } else if (msg.role == "ai") {
+                    return new AIMessage(msg.content)
+                }
+            })
+        },
+        { version: "v2" }
+    );
+
+    return stream;
 }
 
 export async function generateChatTitle(message) {

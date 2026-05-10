@@ -121,10 +121,6 @@ const Dashboard = () => {
                         </div>
                         <div className="flex-1 overflow-hidden">
                             <p className="text-sm font-semibold truncate group-hover:text-white transition-colors">{user?.username || 'User'}</p>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Free Member</p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -201,9 +197,15 @@ const Dashboard = () => {
                                     <div className={`flex-1 space-y-4 ${msg.role === 'user' ? 'text-right' : ''}`}>
                                         <div className={`inline-block max-w-[90%] text-left ${msg.role === 'user' ? 'bg-white/5 p-4 rounded-2xl border border-white/10 shadow-lg' : ''}`}>
                                             {msg.role === 'ai' ? (
-                                                <div className="markdown-content text-lg leading-relaxed text-gray-300 prose prose-invert max-w-none">
-                                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                                </div>
+                                                msg.content ? (
+                                                    <div className="markdown-content text-lg leading-relaxed text-gray-300 prose prose-invert max-w-none">
+                                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                                    </div>
+                                                ) : (
+                                                    <div className="ai-msg">
+                                                        <div className="spinner" /> Thinking...
+                                                    </div>
+                                                )
                                             ) : (
                                                 <p className="text-lg leading-relaxed whitespace-pre-wrap text-white font-medium">
                                                     {msg.content}
@@ -213,11 +215,6 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && (
-                                <div className="ai-msg">
-                                    <div className="spinner" /> Thinking...
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
@@ -253,13 +250,6 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    <label className="hidden sm:flex items-center gap-2 cursor-pointer p-2 hover:bg-white/5 rounded-xl group/pro">
-                                        <div className="w-4 h-4 rounded-full border-2 border-gray-600 flex items-center justify-center group-hover/pro:border-teal-500">
-                                            <div className="w-2 h-2 rounded-full bg-teal-500 opacity-0 group-hover/pro:opacity-100"></div>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-gray-500 group-hover/pro:text-white uppercase tracking-widest">Pro</span>
-                                    </label>
-
                                     <button
                                         type="submit"
                                         disabled={!message.trim()}

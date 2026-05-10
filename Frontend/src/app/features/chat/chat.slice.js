@@ -25,6 +25,15 @@ export const chatSlice = createSlice({
                 state.chats[chatId].messages.push({ content, role })
             }
         },
+        updateStreamingMessage: (state, action) => {
+            const { chatId, content } = action.payload;
+            if (state.chats[chatId] && state.chats[chatId].messages.length > 0) {
+                const messages = state.chats[chatId].messages;
+                if (messages[messages.length - 1].role === 'ai') {
+                    messages[messages.length - 1].content = content;
+                }
+            }
+        },
         setMessages: (state, action) => {
             const { chatId, messages } = action.payload;
             if (state.chats[chatId]) {
@@ -46,7 +55,7 @@ export const chatSlice = createSlice({
     }
 });
 
-export const { setChats, setCurrentChatId, setLoading, setError, createNewChat, addNewMessage, setMessages } = chatSlice.actions;
+export const { setChats, setCurrentChatId, setLoading, setError, createNewChat, addNewMessage, updateStreamingMessage, setMessages } = chatSlice.actions;
 export default chatSlice.reducer;
 
 // chats = {

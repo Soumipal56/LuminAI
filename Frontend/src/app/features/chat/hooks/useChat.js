@@ -1,6 +1,6 @@
 import { initializeSocketConnection } from "../service/chat.socket";
-import { sendMessage as sendMessageAPI, getChats, getMessages, deleteChat, shareChat } from "../service/chat.api";
-import { setChats, setCurrentChatId, setError, setLoading, createNewChat, addNewMessage, setMessages } from "../chat.slice"
+import { sendMessageStream, getChats, getMessages, deleteChat, shareChat } from "../service/chat.api";
+import { setChats, setCurrentChatId, setError, setLoading, createNewChat, addNewMessage, setMessages, updateStreamingMessage } from "../chat.slice"
 import { useDispatch } from "react-redux";
 
 export const useChat = () => {
@@ -9,27 +9,52 @@ export const useChat = () => {
 
     async function handleSendMessage({ message, chatId }){
         dispatch(setLoading(true))
+        let newChatId = chatId;
+
         try {
-            const data = await sendMessageAPI({ message, chatId})
-            const { chat, aiMessage } = data
-            dispatch(createNewChat({
-                chatId: chat._id,
-                title: chat.title,
-            }))
-            dispatch(addNewMessage({
-                chatId: chat._id,
-                content: message,
-                role: "user",
-            }))
-            dispatch(addNewMessage({
-                chatId: chat._id,
-                content: aiMessage.content,
-                role: aiMessage.role,
-            }))
-            dispatch(setCurrentChatId(chat._id))
+            await sendMessageStream({
+                message, 
+                chatId,
+                onInit: (data) => {
+                    const { chat, title } = data;
+                    newChatId = chat._id;
+                    dispatch(createNewChat({
+                        chatId: chat._id,
+                        title: title || chat.title,
+                    }))
+                    dispatch(addNewMessage({
+                        chatId: chat._id,
+                        content: message,
+                        role: "user",
+                    }))
+                    dispatch(setCurrentChatId(chat._id))
+                    
+                    // Create an empty placeholder AI message that will stream text
+                    dispatch(addNewMessage({
+                        chatId: chat._id,
+                        content: "",
+                        role: "ai",
+                    }))
+                },
+                onContent: (content) => {
+                    dispatch(updateStreamingMessage({
+                        chatId: newChatId,
+                        content
+                    }))
+                },
+                onTool: (tools) => {
+                    // Placeholder: we could display tool usages if desired
+                },
+                onDone: (aiMessage) => {
+                    dispatch(setLoading(false))
+                },
+                onError: (err) => {
+                    dispatch(setError(err.message))
+                    dispatch(setLoading(false))
+                }
+            })
         } catch (err) {
             dispatch(setError(err.message))
-        } finally {
             dispatch(setLoading(false))
         }
     }
