@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
 import { setCurrentChatId } from '../chat.slice';
@@ -12,6 +12,7 @@ const Dashboard = () => {
     const { user } = useSelector(state => state.auth);
     const [message, setMessage] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const messagesEndRef = useRef(null);
 
     const chats = useSelector((state) => state.chat.chats)
     const currentChatId = useSelector((state) => state.chat.currentChatId)
@@ -47,6 +48,14 @@ const Dashboard = () => {
             chat.handleGetMessages(currentChatId);
         }
     }, [currentChatId]);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [currentMessages]);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
@@ -87,8 +96,6 @@ const Dashboard = () => {
                 <nav className="flex-1 mt-6 px-2 space-y-1 overflow-y-auto custom-scrollbar">
                     {[
                         { icon: '🏠', label: 'Home', active: true },
-                        { icon: '🌐', label: 'Discover' },
-                        { icon: '📚', label: 'Library' },
                     ].map((item) => (
                         <a
                             key={item.label}
@@ -233,6 +240,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             ))}
+                            <div ref={messagesEndRef} />
                         </div>
                     )}
                 </div>
@@ -257,16 +265,7 @@ const Dashboard = () => {
                                 }}
                             />
 
-                            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-white/5">
-                                <div className="flex items-center gap-1">
-                                    <button type="button" className="p-2 hover:bg-gray-100 dark:bg-white/5 rounded-xl transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
-                                        <span className="text-lg">📎</span>
-                                    </button>
-                                    <button type="button" className="p-2 hover:bg-gray-100 dark:bg-white/5 rounded-xl transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white">
-                                        <span className="text-lg">🔍</span>
-                                    </button>
-                                </div>
-
+                            <div className="flex items-center justify-end pt-2 border-t border-gray-200 dark:border-white/5">
                                 <div className="flex items-center gap-4">
                                     <button
                                         type="submit"
