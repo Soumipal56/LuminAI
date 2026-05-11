@@ -1,0 +1,10 @@
+{
+  "name": "lumin-ai",
+  "version": "1.0.0",
+  "description": "LuminAI Monorepo",
+  "scripts": {
+    "install-all": "npm install --prefix Backend && npm install --prefix Frontend",
+    "build": "npm run install-all && npm run build --prefix Frontend && cp -r Frontend/dist Backend/",
+    "start": "npm start --prefix Backend"
+  }
+}
