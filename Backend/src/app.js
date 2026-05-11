@@ -50,7 +50,7 @@ app.use(`${ROUTES.prefix}/auth`, authRouter);
 app.use(`${ROUTES.prefix}/chats`, chatRouter);
 app.use(`${ROUTES.prefix}/shares`, shareRouter);
 
-const publicPath = path.join(__dirname, "../public");
+const publicPath = path.join(__dirname, "../dist");
 console.log("Looking for static files at:", publicPath);
 console.log("Folder exists:", fs.existsSync(publicPath));
 
@@ -60,7 +60,7 @@ if (fs.existsSync(publicPath)) {
     res.sendFile(path.join(publicPath, "index.html"));
   });
 } else {
-  console.error("❌ Public folder not found at:", publicPath);
+  console.error("❌ Dist folder not found at:", publicPath);
   app.use((req, res) => {
     res.status(404).json({ error: "Frontend not built" });
   });

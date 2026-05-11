@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hook/useAuth'
+import { useSelector } from 'react-redux'
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ const Register = () => {
 
     const { handleRegister } = useAuth()
     const navigate = useNavigate()
+    const error = useSelector(state => state.auth.error)
+    const loading = useSelector(state => state.auth.loading)
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -22,9 +25,10 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        await handleRegister(formData)
-        // Optionally redirect to login or check for success
-        navigate('/login')
+        const success = await handleRegister(formData)
+        if (success) {
+            navigate('/login')
+        }
     }
 
     return (
@@ -34,6 +38,12 @@ const Register = () => {
                     <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
                     <p className="text-zinc-400">Join us and start your journey today</p>
                 </div>
+
+                {error && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p className="text-red-400 text-sm text-center font-medium">{error}</p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>

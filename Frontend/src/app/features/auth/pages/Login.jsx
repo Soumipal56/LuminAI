@@ -12,6 +12,7 @@ const Login = () => {
 
     const user = useSelector(state => state.auth.user)
     const loading = useSelector(state => state.auth.loading)
+    const error = useSelector(state => state.auth.error)
 
     const { handleLogin } = useAuth()
 
@@ -33,8 +34,10 @@ const Login = () => {
             password: formData.password,
         }
 
-        await handleLogin(payload)
-        navigate('/')
+        const success = await handleLogin(payload)
+        if (success) {
+            navigate('/')
+        }
     }
 
     if (!loading && user) {
@@ -48,6 +51,12 @@ const Login = () => {
                     <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
                     <p className="text-zinc-400">Please enter your details to sign in</p>
                 </div>
+
+                {error && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p className="text-red-400 text-sm text-center font-medium">{error}</p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>

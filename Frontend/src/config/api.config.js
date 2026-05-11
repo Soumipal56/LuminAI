@@ -1,6 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== 'http://localhost:3000') 
-  ? import.meta.env.VITE_API_BASE_URL 
-  : "https://luminai-qdrn.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 console.log("Current API Base URL:", API_BASE_URL);
 
