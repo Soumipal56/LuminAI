@@ -4,15 +4,19 @@ import { HumanMessage, SystemMessage, AIMessage, tool, createAgent } from "langc
 import * as z from "zod"
 import { searchInternet } from "./internet.service.js"
 
-const geminiModel = new ChatGoogleGenerativeAI({
-    model: "gemini-1.5-flash",
-    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
-});
+const geminiModel = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY 
+    ? new ChatGoogleGenerativeAI({
+        model: "gemini-1.5-flash",
+        apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
+    })
+    : null;
 
-const mistralModel = new ChatMistralAI({
-    model: "mistral-small-latest",
-    apiKey: process.env.MISTRAL_API_KEY
-});
+const mistralModel = process.env.MISTRAL_API_KEY
+    ? new ChatMistralAI({
+        model: "mistral-small-latest",
+        apiKey: process.env.MISTRAL_API_KEY
+    })
+    : null;
 
 const searchInternetTool = tool(
     searchInternet,
@@ -26,11 +30,14 @@ const searchInternetTool = tool(
 )
 
 const agent = createAgent({
-    model: mistralModel,
+    model: mistralModel || geminiModel,
     tools: [searchInternetTool],
 })
 
 export async function generateResponseStream(messages) {
+    if (!agent.model) {
+        throw new Error("No AI model available. Please check your API keys.");
+    }
     const stream = await agent.streamEvents(
         {
             messages: messages.map(msg => {
@@ -48,8 +55,12 @@ export async function generateResponseStream(messages) {
 }
 
 export async function generateChatTitle(message) {
+    const model = mistralModel || geminiModel;
+    if (!model) {
+        return "New Chat";
+    }
 
-    const response = await mistralModel.invoke([
+    const response = await model.invoke([
         new SystemMessage(`
             You are a helpful assistant that generates concise and descriptive titles for chat conversations.
             
