@@ -9,6 +9,9 @@ const App = () => {
   const auth = useAuth()
 
   useEffect(() => {
+    console.log("App initialized. Checking for existing session...");
+    const token = localStorage.getItem("token");
+    console.log("Token in localStorage:", token ? "Found" : "Not Found");
     auth.handleGetMe()
   }, [])
   

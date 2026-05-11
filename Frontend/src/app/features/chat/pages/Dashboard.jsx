@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../../auth/hook/useAuth';
 import { useChat } from '../hooks/useChat';
 import { setCurrentChatId } from '../chat.slice';
 import ReactMarkdown from 'react-markdown';
@@ -8,6 +9,7 @@ import { useTheme } from '../../../context/ThemeContext';
 const Dashboard = () => {
     const dispatch = useDispatch();
     const chat = useChat();
+    const auth = useAuth();
     const { theme, setDarkTheme, setLightTheme } = useTheme();
     const { user } = useSelector(state => state.auth);
     const [message, setMessage] = useState('');
@@ -123,7 +125,7 @@ const Dashboard = () => {
                     </div>
                 </nav>
 
-                <div className="p-4 border-t border-yellow-200 dark:border-white/5 bg-[#FEFCE8] dark:bg-[#191C1C]">
+                <div className="p-4 border-t border-yellow-200 dark:border-white/5 bg-[#FEFCE8] dark:bg-[#191C1C] flex flex-col gap-2">
                     <div className="flex items-center gap-3 p-2.5 hover:bg-yellow-100 dark:bg-white/5 rounded-xl cursor-pointer transition-all border border-transparent hover:border-yellow-200 dark:border-white/5 group">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-500 to-violet-600 flex items-center justify-center text-sm font-bold text-gray-900 dark:text-white shadow-lg group-hover:scale-105 transition-transform">
                             {user?.username?.charAt(0).toUpperCase() || 'U'}
@@ -132,6 +134,17 @@ const Dashboard = () => {
                             <p className="text-sm font-semibold truncate group-hover:text-gray-900 dark:text-white transition-colors">{user?.username || 'User'}</p>
                         </div>
                     </div>
+                    <button 
+                        onClick={() => auth.handleLogout()}
+                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Logout
+                    </button>
                 </div>
             </aside>
 

@@ -43,15 +43,24 @@ export function useAuth() {
             const data = await getMe()
             dispatch(setUser(data.user))
         } catch (err) {
-            dispatch(setError(err.response?.data?.message || "Failed to fetch user data"))
+            console.error("Auth initialization failed:", err);
+            // If the token is invalid, clear it
+            localStorage.removeItem("token");
+            dispatch(setUser(null))
         } finally {
             dispatch(setLoading(false))
         }
     }
 
+    async function handleLogout() {
+        localStorage.removeItem("token");
+        dispatch(setUser(null));
+    }
+
     return {
         handleRegister,
         handleLogin,
-        handleGetMe
+        handleGetMe,
+        handleLogout
     }
 }

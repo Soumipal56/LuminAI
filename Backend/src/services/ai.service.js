@@ -20,13 +20,16 @@ const mistralModel = process.env.MISTRAL_API_KEY
     : null;
 
 const searchInternetTool = tool(
-    searchInternet,
+    async (args) => {
+        const query = typeof args === 'string' ? args : args.query;
+        return await searchInternet({ query });
+    },
     {
-        name: "searchInternet",
-        description: "Use this tool when you need to search the internet for latest information. This tool is not to be used to answer questions which can be answered without searching the internet. If the user asks for weather report, use this tool. If the user asks about a topic, use this tool. If the user asks something that requires searching the internet, use this tool. If the user asks something that can be answered without searching the internet, do not use this tool.",
-        inputSchema: z.object({
-            query: z.string().describe("The query to search the internet for."),
-        }),
+        name: "search_internet",
+        description: "Search the internet for real-time information. Use this tool when you need up-to-date info or facts not in your training data.",
+        schema: z.object({
+            query: z.string().describe("The search query to search for on the internet")
+        })
     }
 )
 
