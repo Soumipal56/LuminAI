@@ -42,6 +42,7 @@ export async function sendMessage(req, res) {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
 
     // Send initial chat info
     res.write(`data: ${JSON.stringify({ type: 'init', chat, title })}\n\n`);

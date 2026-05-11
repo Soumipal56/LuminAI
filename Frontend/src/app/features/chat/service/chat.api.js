@@ -8,10 +8,12 @@ export const sendMessage = async ({message, chatId}) => {
 
 export const sendMessageStream = async ({message, chatId, onInit, onContent, onTool, onDone, onError}) => {
     try {
+        const token = localStorage.getItem("token");
         const response = await fetch(API.chats.message, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             },
             credentials: "include",
             body: JSON.stringify({ message, chat: chatId })

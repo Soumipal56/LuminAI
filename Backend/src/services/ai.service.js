@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatMistralAI } from "@langchain/mistralai";
 import { HumanMessage, SystemMessage, AIMessage, tool, createAgent } from "langchain";
@@ -35,7 +36,7 @@ const agent = createAgent({
 })
 
 export async function generateResponseStream(messages) {
-    if (!agent.model) {
+    if (!mistralModel && !geminiModel) {
         throw new Error("No AI model available. Please check your API keys.");
     }
     const stream = await agent.streamEvents(

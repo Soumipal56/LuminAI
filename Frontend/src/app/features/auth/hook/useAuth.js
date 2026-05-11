@@ -24,6 +24,9 @@ export function useAuth() {
             dispatch(setLoading(true))
             dispatch(setError(null))
             const data = await login({ email, password })
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+            }
             dispatch(setUser(data.user))
             return true
         } catch (err) {
