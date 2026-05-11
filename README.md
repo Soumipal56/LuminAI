@@ -2,7 +2,7 @@
 
 LuminAI is a sophisticated AI-powered chat application designed to provide users with accurate, real-time information. Leveraging cutting-edge Large Language Models (LLMs) and deep internet integration, LuminAI goes beyond static knowledge to deliver up-to-the-minute insights through a sleek, modern interface.
 
-![LuminAI Banner](https://github.com/Soumipal56/LuminAI/raw/main/Frontend/public/banner.png) *(Note: Add your actual banner image path here)*
+![LuminAI Banner](banner.png)
 
 ## 🚀 Features
 
